@@ -56,9 +56,79 @@ class ServerBase(QtCore.QObject):
         print('Disconnected connection')
 
     def read(self):
-        pass
-    def write(self):
-        pass
+        bytes_remaining = -1
+        json_data = ''
+
+        # built in method that returns boolean
+        while self.socket.bytesAvailable():
+            if bytes_remaining <= 0:
+                byte_array = self.socket.read(ServerBase.HEADER_SIZE)
+                bytes_remaining, valid = byte_array.toInt()
+                if not valid:
+                    bytes_remaining = -1
+                    self.write_error("invalid header")
+
+                    # purge unknown data
+                    self.socket.readAll()
+
+            # Body
+            else:
+                byte_array = self.socket.read(bytes_remaining)
+                bytes_remaining -= len(byte_array)
+                json_data += byte_array.data().decode()
+
+                if bytes_remaining == 0:
+                    bytes_remaining = -1
+                    data = json.loads(json_data)
+
+                    self.process_data(data)
+                    json_data = ''
+
+
+    def write(self, reply):
+        print("here")
+        json_data = json.dumps(reply)
+
+        if self.socket.state() == QtNetwork.QTcpSocket.ConnectedState:
+            header = "{0}".format(len(json_data.encode())).zfill(ServerBase.HEADER_SIZE)
+            data = QtCore.QByteArray('{0}{1}'.format(header, json_data).encode())
+            self.socket.write(data)
+        else:
+            print("Error: not still connected")
+
+    def write_error(self, error_msg):
+        reply = {
+            'success': False,
+            'msg': error_msg
+        }
+
+        self.write(reply)
+
+    def process_data(self, data):
+        reply = {
+            'success': False
+        }
+
+        cmd = data['cmd']
+
+        if cmd == 'ping':
+            reply['success'] = True
+
+        else:
+            self.process_cmd(cmd, data, reply)
+            if not reply['success']:
+                reply['cmd'] = cmd
+                if not 'msg' in reply.keys():
+                    reply['msg'] = "Unkown Error"
+        
+
+        
+
+        self.write(reply)
+    def process_cmd(self, cmd, data, reply):
+
+        reply['msg'] = "invalid command: {0}".format(cmd )
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QDialog()
