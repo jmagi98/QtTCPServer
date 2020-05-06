@@ -7,3 +7,5 @@
 ### Project Structure
 
 - The server and client both have base classes that are then extended for the purposes of a basic example
+
+- Could extend the base server to specifically work with Maya
