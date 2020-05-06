@@ -100,6 +100,7 @@ class ClientBase(object):
             return False
         else:
             if not reply['success']:
+                print('here')
                 print("Error: Did not recieve successful reply")
                 return False
             else:
@@ -116,14 +117,3 @@ class ClientBase(object):
         reply = self.send(cmd)
         return self.isValidReply(reply)
 
-if __name__ == '__main__':
-    client = ClientBase()
-    if client.connect():
-        print('client connected')
-        
-        print(client.ping())
-
-        if client.disconnect():
-            print('client disconnected')
-    else:
-        print('error connecting')

@@ -6,6 +6,7 @@ import traceback
 from PySide2 import QtCore
 from PySide2 import QtNetwork
 from PySide2 import QtWidgets
+
 '''
 Only supports one connection - multiple connections will cause it to be dropped
 
@@ -20,10 +21,8 @@ class ServerBase(QtCore.QObject):
         self.initialize()
 
     def initialize(self):
-        print('hello world')
         self.server = QtNetwork.QTcpServer(self) 
         self.server.newConnection.connect(self.establish_connection)
-        print('here')
         # check if server is successfully listening on our specified port
         if self.listen():
             print('Server is listening on port: ' + str(self.port))
@@ -86,7 +85,6 @@ class ServerBase(QtCore.QObject):
 
 
     def write(self, reply):
-        print("here")
         json_data = json.dumps(reply)
 
         if self.socket.state() == QtNetwork.QTcpSocket.ConnectedState:
@@ -126,17 +124,9 @@ class ServerBase(QtCore.QObject):
 
         self.write(reply)
     def process_cmd(self, cmd, data, reply):
-
+        print('not overriden')
         reply['msg'] = "invalid command: {0}".format(cmd )
 
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = QtWidgets.QDialog()
-    window.setWindowTitle("Server Base")
-    window.setFixedSize(240, 150)
-    QtWidgets.QPlainTextEdit(window)
-    server = ServerBase(window)
-    window.show()
-    app.exec_()
+
 
 
