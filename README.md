@@ -6,4 +6,4 @@
 
 ### Project Structure
 
-- The server and client both have base clases that are then extended for the purposes of a basic example
+- The server and client both have base classes that are then extended for the purposes of a basic example
